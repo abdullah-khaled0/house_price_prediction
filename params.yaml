@@ -1,0 +1,10 @@
+prepare:
+  split: 0.20
+  seed: 42
+
+train:
+  seed: 42
+  learning_rate: 0.1
+  max_depth: 3
+  n_estimators: 300
+
