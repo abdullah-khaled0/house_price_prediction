@@ -1,5 +1,3 @@
-import json
-import math
 import os
 import pickle
 import sys
@@ -13,14 +11,6 @@ from matplotlib import pyplot as plt
 
 def evaluate(model, matrix, split, live, save_path):
     """
-    Dump all evaluation metrics and plots for given datasets.
-
-    Args:
-        model (sklearn.ensemble.RandomForestClassifier): Trained classifier.
-        matrix (scipy.sparse.csr_matrix): Input matrix.
-        split (str): Dataset name.
-        live (dvclive.Live): Dvclive instance.
-        save_path (str): Path to save the metrics.
     """
     labels = matrix[:, 1].toarray().astype(int)
     x = matrix[:, 2:]

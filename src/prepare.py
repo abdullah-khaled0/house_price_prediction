@@ -1,77 +1,45 @@
 import os
-import random
-import re
 import sys
-import xml.etree.ElementTree
-
-import yaml
+import pandas as pd
 
 
-def process_posts(input_lines, fd_out_train, fd_out_test, target_tag, split):
-    """
-    Process the input lines and write the output to the output files.
+def get_df(file_path):
+    """Read the input CSV file and return a DataFrame."""
+    try:
+        df = pd.read_csv(file_path)
+        sys.stderr.write(f"The input DataFrame {file_path} size is {df.shape}\n")
+        return df
+    except Exception as e:
+        sys.stderr.write(f"Error reading the file {file_path}: {e}\n")
+        sys.exit(1)
 
-    Args:
-        input_lines (list): List of input lines.
-        fd_out_train (file): Output file for the training data set.
-        fd_out_test (file): Output file for the test data set.
-        target_tag (str): Target tag.
-        split (float): Test data set split ratio.
-    """
-    num = 1
-    for line in input_lines:
-        try:
-            fd_out = fd_out_train if random.random() > split else fd_out_test
-            attr = xml.etree.ElementTree.fromstring(line).attrib
 
-            pid = attr.get("Id", "")
-            label = 1 if target_tag in attr.get("Tags", "") else 0
-            title = re.sub(r"\s+", " ", attr.get("Title", "")).strip()
-            body = re.sub(r"\s+", " ", attr.get("Body", "")).strip()
-            text = title + " " + body
-
-            fd_out.write("{}\t{}\t{}\n".format(pid, label, text))
-
-            num += 1
-        except Exception as ex:
-            sys.stderr.write(f"Skipping the broken line {num}: {ex}\n")
+def save_df(df, output_dir, filename="prepared_data.csv"):
+    """Save the DataFrame to the specified directory."""
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+    output_path = os.path.join(output_dir, filename)
+    try:
+        df.to_csv(output_path, index=False)
+        sys.stderr.write(f"DataFrame saved to {output_path}\n")
+    except Exception as e:
+        sys.stderr.write(f"Error saving the DataFrame: {e}\n")
+        sys.exit(1)
 
 
 def main():
-    params = yaml.safe_load(open("params.yaml"))["prepare"]
-
     if len(sys.argv) != 2:
-        sys.stderr.write("Arguments error. Usage:\n")
-        sys.stderr.write("\tpython prepare.py data-file\n")
+        sys.stderr.write("Arguments error. Usage: python script.py <input_data_path>\n")
         sys.exit(1)
 
-    # Test data set split ratio
-    split = params["split"]
-    random.seed(params["seed"])
+    in_path = sys.argv[1]
+    train_input = os.path.join(in_path, "train.csv")
 
-    input = sys.argv[1]
-    output_train = os.path.join("data", "prepared", "train.tsv")
-    output_test = os.path.join("data", "prepared", "test.tsv")
+    dataset_df = get_df(train_input)
+    dataset_df = dataset_df.drop('Id', axis=1)
 
-    os.makedirs(os.path.join("data", "prepared"), exist_ok=True)
-
-    input_lines = []
-    with open(input) as fd_in:
-        input_lines = fd_in.readlines()
-
-    fd_out_train = open(output_train, "w", encoding="utf-8")
-    fd_out_test = open(output_test, "w", encoding="utf-8")
-
-    process_posts(
-        input_lines=input_lines,
-        fd_out_train=fd_out_train,
-        fd_out_test=fd_out_test,
-        target_tag="<r>",
-        split=split,
-    )
-
-    fd_out_train.close()
-    fd_out_test.close()
+    output_dir = os.path.join("data", "prepare")
+    save_df(dataset_df, output_dir)
 
 
 if __name__ == "__main__":
