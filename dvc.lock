@@ -1,0 +1,86 @@
+schema: '2.0'
+stages:
+  prepare:
+    cmd: python src/prepare.py data/data.csv
+    deps:
+    - path: data/data.csv
+      hash: md5
+      md5: 80ccab65fb115cbad143dbbd2bcd5577
+      size: 460676
+    - path: src/prepare.py
+      hash: md5
+      md5: 55cf6c60bb9d7c3c554f05403dbeecd5
+      size: 1322
+    outs:
+    - path: data/prepare
+      hash: md5
+      md5: ea0a87c1180b071c223ed3d145d08e87.dir
+      size: 446619
+      nfiles: 1
+  preprocessing:
+    cmd: python src/preprocessing.py data/prepare/prepared_data.csv
+    deps:
+    - path: data/prepare
+      hash: md5
+      md5: ea0a87c1180b071c223ed3d145d08e87.dir
+      size: 446619
+      nfiles: 1
+    - path: src/preprocessing.py
+      hash: md5
+      md5: 4ab922776daeee1bb39e0911eb64560d
+      size: 4059
+    params:
+      params.yaml:
+        preprocessing.seed: 42
+        preprocessing.split: 0.2
+    outs:
+    - path: data/processed
+      hash: md5
+      md5: d951133e71daa0370e15548de9d88c6e.dir
+      size: 2155681
+      nfiles: 4
+  train:
+    cmd: python src/train.py data/processed model/xgb_model.pkl
+    deps:
+    - path: data/processed
+      hash: md5
+      md5: d951133e71daa0370e15548de9d88c6e.dir
+      size: 2155681
+      nfiles: 4
+    - path: src/train.py
+      hash: md5
+      md5: d5856867f2488f36ce6afdaf326a05a5
+      size: 2181
+    params:
+      params.yaml:
+        train.learning_rate: 0.1
+        train.max_depth: 3
+        train.n_estimators: 300
+        train.seed: 42
+    outs:
+    - path: model/xgb_model.pkl
+      hash: md5
+      md5: e01eddfbe1126b3dc692d040ffafb0e5
+      size: 343749
+  evaluate:
+    cmd: python src/evaluate.py model/xgb_model.pkl data/processed
+    deps:
+    - path: data/processed
+      hash: md5
+      md5: d951133e71daa0370e15548de9d88c6e.dir
+      size: 2155681
+      nfiles: 4
+    - path: model/xgb_model.pkl
+      hash: md5
+      md5: e01eddfbe1126b3dc692d040ffafb0e5
+      size: 343749
+    - path: src/evaluate.py
+      hash: md5
+      md5: 77a6d1b7c8b7dc44d3afe451ac2aaa5f
+      size: 3101
+    outs:
+    - path: eval
+      hash: md5
+      md5: 5253ded14e7369652fe929442c837d92.dir
+      size: 86413
+      nfiles: 3
