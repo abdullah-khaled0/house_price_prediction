@@ -48,7 +48,7 @@ def split_data(dataset_df: pd.DataFrame, target_col: str, test_size: float = 0.2
     return train_test_split(X, y, test_size=test_size, random_state=random_state)
 
 
-def scale_data(X_train: pd.DataFrame, X_test: pd.DataFrame) -> (np.ndarray, np.ndarray):
+def scale_data(X_train: pd.DataFrame, X_test: pd.DataFrame) -> (np.ndarray, np.ndarray): # type: ignore
     """Scale the features using StandardScaler."""
     scaler = StandardScaler()
     X_train_scaled = scaler.fit_transform(X_train)

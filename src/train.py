@@ -33,10 +33,10 @@ def main():
     # Load parameters from params.yaml
     params = yaml.safe_load(open("params.yaml"))["train"]
 
-    if len(sys.argv) != 3:
-        sys.stderr.write("Arguments error. Usage:\n")
-        sys.stderr.write("\tpython train.py <input_data_directory> <output_model_path>\n")
-        sys.exit(1)
+    # if len(sys.argv) != 3:
+    #     sys.stderr.write("Arguments error. Usage:\n")
+    #     sys.stderr.write("\tpython train.py <input_data_directory> <output_model_path>\n")
+    #     sys.exit(1)
 
     input_data_dir = sys.argv[1]
     output_model_path = sys.argv[2]
