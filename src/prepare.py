@@ -33,9 +33,9 @@ def main():
         sys.exit(1)
 
     in_path = sys.argv[1]
-    train_input = os.path.join(in_path, "train.csv")
+    data_input = os.path.join(in_path, "data.csv")
 
-    dataset_df = get_df(train_input)
+    dataset_df = get_df(data_input)
     dataset_df = dataset_df.drop('Id', axis=1)
 
     output_dir = os.path.join("data", "prepare")
