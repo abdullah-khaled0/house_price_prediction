@@ -16,6 +16,7 @@ def get_df(file_path):
 
 def save_df(df, output_dir, filename="prepared_data.csv"):
     """Save the DataFrame to the specified directory."""
+
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
     output_path = os.path.join(output_dir, filename)
@@ -28,12 +29,12 @@ def save_df(df, output_dir, filename="prepared_data.csv"):
 
 
 def main():
-    # if len(sys.argv) != 2:
+    # if len(sys.argv) != 1:
     #     sys.stderr.write("Arguments error. Usage: python script.py <input_data_path>\n")
     #     sys.exit(1)
 
     in_path = sys.argv[1]
-    data_input = os.path.join(in_path, "data.csv")
+    data_input = os.path.join(in_path)
 
     dataset_df = get_df(data_input)
     dataset_df = dataset_df.drop('Id', axis=1)
