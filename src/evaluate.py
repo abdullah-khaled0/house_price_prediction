@@ -4,47 +4,49 @@ import sys
 
 import pandas as pd
 from sklearn import metrics
-from sklearn import tree
+
 from dvclive import Live
 from matplotlib import pyplot as plt
 
+from columns_names import feature_names
 
-def evaluate(model, matrix, split, live, save_path):
+
+def evaluate(model, X, y, live):
     """
+    Evaluate the model using the provided data and log metrics and plots.
+
+    Args:
+        model (XGBRegressor): Trained XGBoost model.
+        X (pd.DataFrame): Features to evaluate.
+        y (pd.Series): True labels.
+        live (dvclive.Live): DVCLive instance for logging.
     """
-    labels = matrix[:, 1].toarray().astype(int)
-    x = matrix[:, 2:]
+    # Make predictions
+    predictions = model.predict(X)
 
-    predictions_by_class = model.predict_proba(x)
-    predictions = predictions_by_class[:, 1]
-
-    # Use dvclive to log a few simple metrics...
-    avg_prec = metrics.average_precision_score(labels, predictions)
-    roc_auc = metrics.roc_auc_score(labels, predictions)
+    # Calculate regression metrics
+    mse = metrics.mean_squared_error(y, predictions)
+    rmse = mse ** 0.5
+    mae = metrics.mean_absolute_error(y, predictions)
+    r2 = metrics.r2_score(y, predictions)
+    
+    # Log metrics using DVCLive
     if not live.summary:
-        live.summary = {"avg_prec": {}, "roc_auc": {}}
-    live.summary["avg_prec"][split] = avg_prec
-    live.summary["roc_auc"][split] = roc_auc
+        live.summary = {"mse": {}, "rmse": {}, "mae": {}, "r2": {}}
+    live.summary["mse"] = mse
+    live.summary["rmse"] = rmse
+    live.summary["mae"] = mae
+    live.summary["r2"] = r2
 
-    # ... and plots...
-    # ... like an roc plot...
-    live.log_sklearn_plot("roc", labels, predictions, name=f"roc/{split}")
-    # ... and precision recall plot...
-    # ... which passes `drop_intermediate=True` to the sklearn method...
-    live.log_sklearn_plot(
-        "precision_recall",
-        labels,
-        predictions,
-        name=f"prc/{split}",
-        drop_intermediate=True,
-    )
-    # ... and confusion matrix plot
-    live.log_sklearn_plot(
-        "confusion_matrix",
-        labels.squeeze(),
-        predictions_by_class.argmax(-1),
-        name=f"cm/{split}",
-    )
+    # Log the predicted vs actual values plot
+    plt.figure(dpi=100)
+    plt.scatter(y, predictions, alpha=0.5)
+    plt.plot([y.min(), y.max()], [y.min(), y.max()], '--r')
+    plt.xlabel("Actual")
+    plt.ylabel("Predicted")
+    plt.title("Actual vs Predicted")
+    live.log_image(f"actual_vs_predicted.png", plt.gcf())
+    plt.close()
 
 
 def save_importance_plot(live, model, feature_names):
@@ -53,48 +55,52 @@ def save_importance_plot(live, model, feature_names):
 
     Args:
         live (dvclive.Live): DVCLive instance.
-        model (sklearn.ensemble.RandomForestClassifier): Trained classifier.
+        model (XGBRegressor): Trained XGBoost model.
         feature_names (list): List of feature names.
     """
     fig, axes = plt.subplots(dpi=100)
     fig.subplots_adjust(bottom=0.2, top=0.95)
-    axes.set_ylabel("Mean decrease in impurity")
+    axes.set_ylabel("Feature Importance (Gain)")
 
     importances = model.feature_importances_
-    forest_importances = pd.Series(importances, index=feature_names).nlargest(n=30)
-    forest_importances.plot.bar(ax=axes)
+    xgb_importances = pd.Series(importances, index=feature_names).nlargest(n=30)
+    xgb_importances.plot.bar(ax=axes)
 
     live.log_image("importance.png", fig)
+    plt.close(fig)
 
 
 def main():
     EVAL_PATH = "eval"
 
-    if len(sys.argv) != 3:
-        sys.stderr.write("Arguments error. Usage:\n")
-        sys.stderr.write("\tpython evaluate.py model features\n")
-        sys.exit(1)
+    # if len(sys.argv) != 3:
+    #     sys.stderr.write("Arguments error. Usage:\n")
+    #     sys.stderr.write("\tpython evaluate.py <model_file> <input_data_directory>\n")
+    #     sys.exit(1)
 
     model_file = sys.argv[1]
-    train_file = os.path.join(sys.argv[2], "train.pkl")
-    test_file = os.path.join(sys.argv[2], "test.pkl")
+    input_data_dir = sys.argv[2]
 
-    # Load model and data.
+ 
+    test_file = os.path.join(input_data_dir, "X_test.csv")
+    y_test_file = os.path.join(input_data_dir, "y_test.csv")
+
+    # Load model and data
     with open(model_file, "rb") as fd:
         model = pickle.load(fd)
 
-    with open(train_file, "rb") as fd:
-        train, feature_names = pickle.load(fd)
+    X_test = pd.read_csv(test_file)
+    y_test = pd.read_csv(y_test_file).squeeze()
 
-    with open(test_file, "rb") as fd:
-        test, _ = pickle.load(fd)
+    with open('data/column_names.txt', 'r') as file:
+        feature_names = [line.strip() for line in file]
+    
 
-    # Evaluate train and test datasets.
+    # Evaluate train and test datasets
     with Live(EVAL_PATH, dvcyaml=False) as live:
-        evaluate(model, train, "train", live, save_path=EVAL_PATH)
-        evaluate(model, test, "test", live, save_path=EVAL_PATH)
+        evaluate(model, X_test, y_test, live)
 
-        # Dump feature importance plot.
+        # Dump feature importance plot
         save_importance_plot(live, model, feature_names)
 
 

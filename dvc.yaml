@@ -7,12 +7,28 @@ stages:
     outs:
     - data/prepared
   preprocessing:
-    cmd: python src\preprocessing.py data\processed
+    cmd: python src/preprocessing.py data/processed
     deps:
-    - data\prepared
-    - src\preprocessing.py
+    - data/prepared
+    - src/preprocessing.py
     params:
     - preprocessing.seed
     - preprocessing.split
     outs:
-    - data\processed
+    - data/processed
+
+  train:
+    cmd: python src/train.py data/preprocessing model/xgb_model.pkl
+    deps:
+    - data/preprocessing
+    - src/train.py
+    params:
+    - train.learning_rate
+    - train.max_depth
+    - train.n_estimators
+    - train.seed
+    outs:
+    - model.pkl
+
+metrics:
+- eval/metrics.json

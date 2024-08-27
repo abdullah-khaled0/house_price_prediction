@@ -78,7 +78,7 @@ def main():
     # Load parameters from YAML file
     try:
         with open("params.yaml", "r") as file:
-            params = yaml.safe_load(file)["processing"]
+            params = yaml.safe_load(file)["preprocessing"]
         split = params["split"]
     except Exception as e:
         sys.stderr.write(f"Error reading params.yaml: {e}\n")
@@ -90,6 +90,10 @@ def main():
 
     # Split the data into training and testing sets
     X_train, X_test, y_train, y_test = split_data(dataset_df, target_col='SalePrice', test_size=split)
+
+    with open('data/column_names.txt', 'w') as file:
+        for name in X_train.columns:
+            file.write(f"{name}\n")
 
     # Scale the features
     X_train_scaled, X_test_scaled = scale_data(X_train, X_test)
