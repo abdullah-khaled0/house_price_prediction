@@ -78,7 +78,7 @@ def main():
     # Load parameters from YAML file
     try:
         with open("params.yaml", "r") as file:
-            params = yaml.safe_load(file)["preprocessing"]
+            params = yaml.safe_load(file)["processing"]
         split = params["split"]
     except Exception as e:
         sys.stderr.write(f"Error reading params.yaml: {e}\n")

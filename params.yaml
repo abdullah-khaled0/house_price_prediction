@@ -1,4 +1,4 @@
-processing:
+preprocessing:
   split: 0.20
   seed: 42
 
