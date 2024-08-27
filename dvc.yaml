@@ -30,5 +30,13 @@ stages:
     outs:
     - model.pkl
 
+  evaluate:
+    cmd: python src/evaluate.py model/xgb_model.pkl data/preprocessing
+    deps:
+    - data/preprocessing
+    - model/xgb_model.pkl
+    - src/evaluate.py
+    outs:
+    - eval
 metrics:
 - eval/metrics.json
