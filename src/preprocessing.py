@@ -72,6 +72,9 @@ def main():
     #     sys.stderr.write("Usage: python script.py <input_data_directory>\n")
     #     sys.exit(1)
 
+    # if not os.path.exists("data/processed"):
+    #     os.makedirs("data/processed")
+
     input_data_dir = sys.argv[1]
     data_input = os.path.join(input_data_dir)
 

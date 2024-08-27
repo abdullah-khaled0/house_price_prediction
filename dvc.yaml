@@ -5,11 +5,12 @@ stages:
     - data/data.csv
     - src/prepare.py
     outs:
-    - data/prepared
+    - data/prepare
+
   preprocessing:
-    cmd: python src/preprocessing.py data/processed
+    cmd: python src/preprocessing.py data/prepare/prepared_data.csv
     deps:
-    - data/prepared
+    - data/prepare
     - src/preprocessing.py
     params:
     - preprocessing.seed
@@ -18,9 +19,9 @@ stages:
     - data/processed
 
   train:
-    cmd: python src/train.py data/preprocessing model/xgb_model.pkl
+    cmd: python src/train.py data/processed model/xgb_model.pkl
     deps:
-    - data/preprocessing
+    - data/processed
     - src/train.py
     params:
     - train.learning_rate
@@ -28,15 +29,16 @@ stages:
     - train.n_estimators
     - train.seed
     outs:
-    - model.pkl
+    - model/xgb_model.pkl
 
   evaluate:
-    cmd: python src/evaluate.py model/xgb_model.pkl data/preprocessing
+    cmd: python src/evaluate.py model/xgb_model.pkl data/processed
     deps:
-    - data/preprocessing
+    - data/processed
     - model/xgb_model.pkl
     - src/evaluate.py
     outs:
     - eval
+
 metrics:
 - eval/metrics.json

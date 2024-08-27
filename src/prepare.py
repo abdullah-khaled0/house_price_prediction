@@ -14,11 +14,14 @@ def get_df(file_path):
         sys.exit(1)
 
 
-def save_df(df, output_dir, filename="prepared_data.csv"):
+def save_df(df, filename="prepared_data.csv"):
     """Save the DataFrame to the specified directory."""
 
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
+    if not os.path.exists("data/prepare"):
+        os.makedirs("data/prepare")
+
+    output_dir = os.path.join("data", "prepare")
+
     output_path = os.path.join(output_dir, filename)
     try:
         df.to_csv(output_path, index=False)
@@ -38,9 +41,7 @@ def main():
 
     dataset_df = get_df(data_input)
     dataset_df = dataset_df.drop('Id', axis=1)
-
-    output_dir = os.path.join("data", "prepare")
-    save_df(dataset_df, output_dir)
+    save_df(dataset_df)
 
 
 if __name__ == "__main__":
