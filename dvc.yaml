@@ -6,3 +6,13 @@ stages:
     - src/prepare.py
     outs:
     - data/prepared
+  preprocessing:
+    cmd: python src\preprocessing.py data\processed
+    deps:
+    - data\prepared
+    - src\preprocessing.py
+    params:
+    - preprocessing.seed
+    - preprocessing.split
+    outs:
+    - data\processed
