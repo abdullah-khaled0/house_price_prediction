@@ -42,3 +42,6 @@ stages:
 
 metrics:
 - eval/metrics.json
+plots:
+- eval/plots/images/importance.png
+- eval/plots/images/actual_vs_predicted.png
