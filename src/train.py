@@ -3,10 +3,13 @@ import pickle
 import sys
 import yaml
 import pandas as pd
+
+from dvclive.xgb import DVCLiveCallback
+from dvclive import Live
 from xgboost import XGBRegressor
 
 
-def train(seed, n_estimators, max_depth, learning_rate, X_train, y_train):
+def train(seed, n_estimators, max_depth, learning_rate, X_train, y_train, X_test, y_test, model_path):
     """
     Train an XGBoost model with the given parameters.
     
@@ -21,29 +24,61 @@ def train(seed, n_estimators, max_depth, learning_rate, X_train, y_train):
     Returns:
         XGBRegressor: Trained XGBoost model.
     """
-    # Create and train the XGBRegressor model
-    xgb = XGBRegressor(n_estimators=n_estimators, max_depth=max_depth, 
-                       learning_rate=learning_rate, random_state=seed)
-    xgb.fit(X_train, y_train)
 
-    return xgb
+    xgb = XGBRegressor(
+        n_estimators=n_estimators, 
+        max_depth=max_depth, 
+        learning_rate=learning_rate, 
+        random_state=seed
+    )
+
+    xgb.fit(
+        X_train, y_train
+    )
+
+    with open(model_path, "wb") as fd:
+        pickle.dump(xgb, fd)
+        sys.stderr.write(f"Model saved to {model_path}\n")
+
+    with Live() as live:
+        
+        xgb = XGBRegressor(
+            n_estimators=n_estimators, 
+            max_depth=max_depth, 
+            learning_rate=learning_rate, 
+            random_state=seed,
+            eval_metric=["mae", "rmse"],
+            callbacks=[DVCLiveCallback()]
+        )
+
+        xgb.fit(
+            X_train, 
+            y_train,
+            eval_set=[(X_test, y_test)]
+        )
+
+        live.log_artifact("model/xgb_model.pkl", type="model")
 
 
 def main():
     # Load parameters from params.yaml
     params = yaml.safe_load(open("params.yaml"))["train"]
 
-    # if len(sys.argv) != 3:
-    #     sys.stderr.write("Arguments error. Usage:\n")
-    #     sys.stderr.write("\tpython train.py <input_data_directory> <output_model_path>\n")
-    #     sys.exit(1)
+    if len(sys.argv) != 3:
+        sys.stderr.write("Arguments error. Usage:\n")
+        sys.stderr.write("\tpython train.py <input_data_directory> <output_model_path>\n")
+        sys.exit(1)
 
     input_data_dir = sys.argv[1]
     output_model_path = sys.argv[2]
 
     # Load processed training data
     X_train = pd.read_csv(os.path.join(input_data_dir, "X_train.csv"))
-    y_train = pd.read_csv(os.path.join(input_data_dir, "y_train.csv")).squeeze()  # .squeeze() to convert to Series
+    y_train = pd.read_csv(os.path.join(input_data_dir, "y_train.csv")).squeeze()
+
+    # Load processed testing data
+    X_test = pd.read_csv(os.path.join(input_data_dir, "X_test.csv"))
+    y_test = pd.read_csv(os.path.join(input_data_dir, "y_test.csv")).squeeze()
 
     # Retrieve hyperparameters from the params file
     seed = params["seed"]
@@ -52,13 +87,17 @@ def main():
     learning_rate = params["learning_rate"]
 
     # Train the model
-    xgb = train(seed=seed, n_estimators=n_estimators, max_depth=max_depth, 
-                learning_rate=learning_rate, X_train=X_train, y_train=y_train)
-
-    # Save the trained model to the specified output path
-    with open(output_model_path, "wb") as fd:
-        pickle.dump(xgb, fd)
-        sys.stderr.write(f"Model saved to {output_model_path}\n")
+    train(
+        seed=seed, 
+        n_estimators=n_estimators, 
+        max_depth=max_depth, 
+        learning_rate=learning_rate, 
+        X_train=X_train, 
+        y_train=y_train,
+        X_test=X_test,
+        y_test=y_test,
+        model_path=output_model_path
+    )
 
 
 if __name__ == "__main__":

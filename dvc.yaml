@@ -45,3 +45,9 @@ metrics:
 plots:
 - eval/plots/images/importance.png
 - eval/plots/images/actual_vs_predicted.png
+- dvclive/plots/metrics:
+    x: step
+artifacts:
+  xgb_model:
+    path: model/xgb_model.pkl
+    type: model
