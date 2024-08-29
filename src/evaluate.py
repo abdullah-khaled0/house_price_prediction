@@ -8,8 +8,6 @@ from sklearn import metrics
 from dvclive import Live
 from matplotlib import pyplot as plt
 
-from columns_names import feature_names
-
 
 def evaluate(model, X, y, live):
     """
