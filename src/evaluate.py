@@ -46,6 +46,9 @@ def evaluate(model, X, y, live):
     live.log_image(f"actual_vs_predicted.png", plt.gcf())
     plt.close()
 
+    # Log model artifact
+    live.log_artifact("model/xgb_model.pkl", type="model")
+
 
 def save_importance_plot(live, model, feature_names):
     """

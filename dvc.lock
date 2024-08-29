@@ -49,8 +49,8 @@ stages:
       nfiles: 4
     - path: src/train.py
       hash: md5
-      md5: a8706b5d132fbb2125be93aebf8b33c9
-      size: 2951
+      md5: 42cbdbec35683957566a2547cc2dafb2
+      size: 2162
     params:
       params.yaml:
         train.learning_rate: 0.1
@@ -76,8 +76,8 @@ stages:
       size: 343749
     - path: src/evaluate.py
       hash: md5
-      md5: 1f71b8beabae4c67e88367d188ab057b
-      size: 3058
+      md5: 929a56a4f7abc39482f0a7e7d79563dd
+      size: 3146
     outs:
     - path: eval
       hash: md5
