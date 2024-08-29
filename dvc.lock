@@ -49,8 +49,8 @@ stages:
       nfiles: 4
     - path: src/train.py
       hash: md5
-      md5: 42cbdbec35683957566a2547cc2dafb2
-      size: 2162
+      md5: 7ccdc8a6c72168caed5b90a9a09edb99
+      size: 2136
     params:
       params.yaml:
         train.learning_rate: 0.1
