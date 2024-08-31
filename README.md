@@ -23,6 +23,14 @@ The following Python packages are required to run the scripts:
 - `dvc`
 
 
+### Cloning the Repository
+
+To clone this repository to your local machine, use the following command in your terminal:
+
+```bash
+git clone https://github.com/abdullah0150/house_pricing_prediction.git
+```
+
 You can install the required packages using `pip`:
 
 ```bash
