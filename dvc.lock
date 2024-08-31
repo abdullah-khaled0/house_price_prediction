@@ -53,15 +53,15 @@ stages:
       size: 2136
     params:
       params.yaml:
-        train.learning_rate: 0.1
-        train.max_depth: 3
+        train.learning_rate: 0.001
+        train.max_depth: 5
         train.n_estimators: 300
         train.seed: 42
     outs:
     - path: model/xgb_model.pkl
       hash: md5
-      md5: e01eddfbe1126b3dc692d040ffafb0e5
-      size: 343749
+      md5: 9349891bb034d8b68f111bcd39325174
+      size: 814203
   evaluate:
     cmd: python src/evaluate.py model/xgb_model.pkl data/processed
     deps:
@@ -72,8 +72,8 @@ stages:
       nfiles: 4
     - path: model/xgb_model.pkl
       hash: md5
-      md5: e01eddfbe1126b3dc692d040ffafb0e5
-      size: 343749
+      md5: 9349891bb034d8b68f111bcd39325174
+      size: 814203
     - path: src/evaluate.py
       hash: md5
       md5: 929a56a4f7abc39482f0a7e7d79563dd
@@ -81,6 +81,6 @@ stages:
     outs:
     - path: eval
       hash: md5
-      md5: 5253ded14e7369652fe929442c837d92.dir
-      size: 86413
+      md5: 495d1646139e9daf26c9641b7ddc92cb.dir
+      size: 79631
       nfiles: 3
